@@ -34,8 +34,8 @@ class Events {
 		if(!isset($_SERVER['GROUP_CONFIG'])) {
 			$_SERVER['GROUP_CONFIG'] = array();
 		}
-		$group_config = $_SERVER['GROUP_CONFIG'];
-		if(!isset($group_config[$group_id])) {
+
+		if(!isset($_SERVER['GROUP_CONFIG'][$group_id])) {
 			$groupconfig = array();
 			
 			// 不存在 或 30分钟之后 更新配置
@@ -47,9 +47,9 @@ class Events {
 				$groupconfig['danmu'] = $roomconfig->data->danmu;
 				$groupconfig['isopen'] = $roomconfig->data->isopen;
 			}
-			$group_config[$group_id] = $groupconfig;
+			$_SERVER['GROUP_CONFIG'][$group_id] = $groupconfig;
 		}
-		return $group_config[$group_id];
+		return $_SERVER['GROUP_CONFIG'][$group_id];
 	}
 
 	/**
@@ -110,7 +110,6 @@ class Events {
 				// 配置获取配置地址 检查房间配置
 				if (Settings::CONFIG_GET_URL) {
 					$roomconfig = self::getGroupConfigById($room_id);
-					echo json_encode($roomconfig);
 					// 房间uid与客户端uid匹配 并且 客户端已认证
 					if(($roomconfig['upuid']==$client_uid) && $client_auth){
 						$client_isup = true; // 成为房间所有者
@@ -121,10 +120,10 @@ class Events {
 				$_SESSION['client_name'] = $client_name;
 				$_SESSION['client_uid'] = $client_uid;	
 				$_SESSION['client_auth'] = $client_auth;
-				$_SESSION['client_isup'] = false;
+				$_SESSION['client_isup'] = $client_isup;
 
 				// 回应登录信息 message格式 {type:login, state:true/false, data:[client_id,client_name], num:xxx}
-				$new_message = array('type'=> 'login', 'state'=> true, 'data'=>array($client_id, $client_name), 'num' => Gateway::getClientCountByGroup($room_id));
+				$new_message = array('type'=> 'login', 'state'=> $client_auth, 'data'=>array($client_id, $client_name), 'num' => Gateway::getClientCountByGroup($room_id));
 				
 				Gateway::joinGroup($client_id, $room_id);
 				Gateway::sendToCurrentClient(json_encode($new_message));
