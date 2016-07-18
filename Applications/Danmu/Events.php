@@ -23,7 +23,9 @@
  * 聊天主逻辑
  * 主要是处理 onMessage onClose
  */
+use \Applications\Settings;
 use \GatewayWorker\Lib\Gateway;
+use \MongoQB\Db;
 
 class Events {
 	/**
@@ -66,7 +68,7 @@ class Events {
 		if (!$message_data) {
 			return;
 		}
-
+		
 		// 根据类型执行不同的业务
 		switch ($message_data['type']) {
 			// 客户端回应服务端的心跳，回应房间人数
@@ -147,6 +149,18 @@ class Events {
 				$room_id = $_SESSION['room_id'];
 				$client_name = $_SESSION['client_name'];
 				$client_isup = $_SESSION['client_isup'];
+				$client_uid = $_SESSION['client_uid'];
+
+				if(Settings::USE_MONGO) {
+					$db = Db::instance('danmu');
+					$db->insert('room'.$room_id, [
+						'roomid' => $room_id,
+						'clientname' => $client_name,
+						'clientuid' => $client_uid,
+						'time' => new MongoDate(),
+						'content' => nl2br(htmlspecialchars($message_data['content']))
+					]);
+				}
 				
 				// 广播弹幕格式 {type:'danmu', data:[[client_id,client_name,...], 'danmudata', 'time']}
 				$new_message = array(
