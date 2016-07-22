@@ -20,4 +20,15 @@ class DanmuHandler implements DanmuIf {
         }
         return $num;
     }
+
+    public function sendGfitDanmuToRoom($roomid, $content, $img)
+    {
+        // 广播弹幕格式 {type:'gift', content:'danmudata', img:'imgpath'}
+        $new_message = array(
+            'type' => 'gift',
+            'content' => $content,
+            'img' => $img
+        );
+        Gateway::sendToGroup($roomid, json_encode($new_message));
+    }
 }

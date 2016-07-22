@@ -27,6 +27,12 @@ interface DanmuIf {
    * @return int
    */
   public function getDanmuNumByRoomId($roomid);
+  /**
+   * @param int $roomid
+   * @param string $content
+   * @param string $img
+   */
+  public function sendGfitDanmuToRoom($roomid, $content, $img);
 }
 
 class DanmuClient implements \Services\Danmu\DanmuIf {
@@ -140,6 +146,56 @@ class DanmuClient implements \Services\Danmu\DanmuIf {
       return $result->success;
     }
     throw new \Exception("getDanmuNumByRoomId failed: unknown result");
+  }
+
+  public function sendGfitDanmuToRoom($roomid, $content, $img)
+  {
+    $this->send_sendGfitDanmuToRoom($roomid, $content, $img);
+    $this->recv_sendGfitDanmuToRoom();
+  }
+
+  public function send_sendGfitDanmuToRoom($roomid, $content, $img)
+  {
+    $args = new \Services\Danmu\Danmu_sendGfitDanmuToRoom_args();
+    $args->roomid = $roomid;
+    $args->content = $content;
+    $args->img = $img;
+    $bin_accel = ($this->output_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
+    if ($bin_accel)
+    {
+      thrift_protocol_write_binary($this->output_, 'sendGfitDanmuToRoom', TMessageType::CALL, $args, $this->seqid_, $this->output_->isStrictWrite());
+    }
+    else
+    {
+      $this->output_->writeMessageBegin('sendGfitDanmuToRoom', TMessageType::CALL, $this->seqid_);
+      $args->write($this->output_);
+      $this->output_->writeMessageEnd();
+      $this->output_->getTransport()->flush();
+    }
+  }
+
+  public function recv_sendGfitDanmuToRoom()
+  {
+    $bin_accel = ($this->input_ instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_read_binary');
+    if ($bin_accel) $result = thrift_protocol_read_binary($this->input_, '\Services\Danmu\Danmu_sendGfitDanmuToRoom_result', $this->input_->isStrictRead());
+    else
+    {
+      $rseqid = 0;
+      $fname = null;
+      $mtype = 0;
+
+      $this->input_->readMessageBegin($fname, $mtype, $rseqid);
+      if ($mtype == TMessageType::EXCEPTION) {
+        $x = new TApplicationException();
+        $x->read($this->input_);
+        $this->input_->readMessageEnd();
+        throw $x;
+      }
+      $result = new \Services\Danmu\Danmu_sendGfitDanmuToRoom_result();
+      $result->read($this->input_);
+      $this->input_->readMessageEnd();
+    }
+    return;
   }
 
 }
@@ -446,6 +502,177 @@ class Danmu_getDanmuNumByRoomId_result {
 
 }
 
+class Danmu_sendGfitDanmuToRoom_args {
+  static $_TSPEC;
+
+  /**
+   * @var int
+   */
+  public $roomid = null;
+  /**
+   * @var string
+   */
+  public $content = null;
+  /**
+   * @var string
+   */
+  public $img = null;
+
+  public function __construct($vals=null) {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        1 => array(
+          'var' => 'roomid',
+          'type' => TType::I32,
+          ),
+        2 => array(
+          'var' => 'content',
+          'type' => TType::STRING,
+          ),
+        3 => array(
+          'var' => 'img',
+          'type' => TType::STRING,
+          ),
+        );
+    }
+    if (is_array($vals)) {
+      if (isset($vals['roomid'])) {
+        $this->roomid = $vals['roomid'];
+      }
+      if (isset($vals['content'])) {
+        $this->content = $vals['content'];
+      }
+      if (isset($vals['img'])) {
+        $this->img = $vals['img'];
+      }
+    }
+  }
+
+  public function getName() {
+    return 'Danmu_sendGfitDanmuToRoom_args';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        case 1:
+          if ($ftype == TType::I32) {
+            $xfer += $input->readI32($this->roomid);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 2:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->content);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        case 3:
+          if ($ftype == TType::STRING) {
+            $xfer += $input->readString($this->img);
+          } else {
+            $xfer += $input->skip($ftype);
+          }
+          break;
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('Danmu_sendGfitDanmuToRoom_args');
+    if ($this->roomid !== null) {
+      $xfer += $output->writeFieldBegin('roomid', TType::I32, 1);
+      $xfer += $output->writeI32($this->roomid);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->content !== null) {
+      $xfer += $output->writeFieldBegin('content', TType::STRING, 2);
+      $xfer += $output->writeString($this->content);
+      $xfer += $output->writeFieldEnd();
+    }
+    if ($this->img !== null) {
+      $xfer += $output->writeFieldBegin('img', TType::STRING, 3);
+      $xfer += $output->writeString($this->img);
+      $xfer += $output->writeFieldEnd();
+    }
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
+class Danmu_sendGfitDanmuToRoom_result {
+  static $_TSPEC;
+
+
+  public function __construct() {
+    if (!isset(self::$_TSPEC)) {
+      self::$_TSPEC = array(
+        );
+    }
+  }
+
+  public function getName() {
+    return 'Danmu_sendGfitDanmuToRoom_result';
+  }
+
+  public function read($input)
+  {
+    $xfer = 0;
+    $fname = null;
+    $ftype = 0;
+    $fid = 0;
+    $xfer += $input->readStructBegin($fname);
+    while (true)
+    {
+      $xfer += $input->readFieldBegin($fname, $ftype, $fid);
+      if ($ftype == TType::STOP) {
+        break;
+      }
+      switch ($fid)
+      {
+        default:
+          $xfer += $input->skip($ftype);
+          break;
+      }
+      $xfer += $input->readFieldEnd();
+    }
+    $xfer += $input->readStructEnd();
+    return $xfer;
+  }
+
+  public function write($output) {
+    $xfer = 0;
+    $xfer += $output->writeStructBegin('Danmu_sendGfitDanmuToRoom_result');
+    $xfer += $output->writeFieldStop();
+    $xfer += $output->writeStructEnd();
+    return $xfer;
+  }
+
+}
+
 class DanmuProcessor {
   protected $handler_ = null;
   public function __construct($handler) {
@@ -506,6 +733,25 @@ class DanmuProcessor {
     else
     {
       $output->writeMessageBegin('getDanmuNumByRoomId', TMessageType::REPLY, $seqid);
+      $result->write($output);
+      $output->writeMessageEnd();
+      $output->getTransport()->flush();
+    }
+  }
+  protected function process_sendGfitDanmuToRoom($seqid, $input, $output) {
+    $args = new \Services\Danmu\Danmu_sendGfitDanmuToRoom_args();
+    $args->read($input);
+    $input->readMessageEnd();
+    $result = new \Services\Danmu\Danmu_sendGfitDanmuToRoom_result();
+    $this->handler_->sendGfitDanmuToRoom($args->roomid, $args->content, $args->img);
+    $bin_accel = ($output instanceof TBinaryProtocolAccelerated) && function_exists('thrift_protocol_write_binary');
+    if ($bin_accel)
+    {
+      thrift_protocol_write_binary($output, 'sendGfitDanmuToRoom', TMessageType::REPLY, $result, $seqid, $output->isStrictWrite());
+    }
+    else
+    {
+      $output->writeMessageBegin('sendGfitDanmuToRoom', TMessageType::REPLY, $seqid);
       $result->write($output);
       $output->writeMessageEnd();
       $output->getTransport()->flush();
